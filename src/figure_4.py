@@ -89,25 +89,29 @@ poll_df['trump_preference'] = poll_df['CC24_364b'].apply(get_trump_preference)
 all_respondents: pd.DataFrame = poll_df[~poll_df[['harris_preference', 'trump_preference']].isna().all(axis=1)]
 state_polls_all: pd.DataFrame = all_respondents.groupby('inputstate').agg({
     'harris_preference': 'mean',
-    'trump_preference': 'mean'
+    'trump_preference': 'mean',
+    'caseid': 'count'  # Count number of respondents per state
 }).reset_index()
 
 # 2. Only likely voters
 likely_voters: pd.DataFrame = poll_df[poll_df['is_likely_voter'] & ~poll_df[['harris_preference', 'trump_preference']].isna().all(axis=1)]
 state_polls_likely: pd.DataFrame = likely_voters.groupby('inputstate').agg({
     'harris_preference': 'mean',
-    'trump_preference': 'mean'
+    'trump_preference': 'mean',
+    'caseid': 'count'  # Count number of respondents per state
 }).reset_index()
 
 # Rename columns for clarity
 state_polls_all.rename(columns={
     'harris_preference': 'harris_poll_all',
-    'trump_preference': 'trump_poll_all'
+    'trump_preference': 'trump_poll_all',
+    'caseid': 'num_respondents_all'
 }, inplace=True)
 
 state_polls_likely.rename(columns={
     'harris_preference': 'harris_poll_likely',
-    'trump_preference': 'trump_poll_likely'
+    'trump_preference': 'trump_poll_likely',
+    'caseid': 'num_respondents_likely'
 }, inplace=True)
 
 # Create a mapping from FIPS state codes to state names
