@@ -1,7 +1,7 @@
 # the goal of this file is to generate 4 plots. 2 for each candidate.
 # for each candidate, we plot the actual popularity of the candidate to the polled popularity of the candidate
 # it is a scatter plot, where each dot is a state
-# the actual popularity of the candidate is the actual two-party vote share of the candidate.
+# the actual popularity of the candidate is the actual vote share of the candidate (including third parties).
 # this data is at ../data/2024_us_election_results_by_state.csv
 # the polled popularity of the candidate is from ../data/CES24_Common.csv (pre-election data only)
 
@@ -33,8 +33,7 @@ election_df: pd.DataFrame = pd.read_csv(election_results_path)
 classification_path: str = "../data/State-Pre-ElectionClassification.csv"
 classification_df: pd.DataFrame = pd.read_csv(classification_path)
 
-# Calculate the two-party vote share for each candidate
-election_df["total_votes"] = election_df["trump_votes"] + election_df["harris_votes"]
+# Calculate the actual vote share for each candidate (including third parties)
 election_df["trump_share"] = election_df["trump_votes"] / election_df["total_votes"]
 election_df["harris_share"] = election_df["harris_votes"] / election_df["total_votes"]
 
@@ -64,9 +63,7 @@ def get_harris_preference(code: Optional[Union[int, float]]) -> Optional[float]:
         return np.nan
     if code == 1:  # Harris
         return 1.0
-    elif code == 2:  # Trump
-        return 0.0
-    return np.nan
+    return 0.0 # anything else
 
 def get_trump_preference(code: Optional[Union[int, float]]) -> Optional[float]:
     """
@@ -82,9 +79,7 @@ def get_trump_preference(code: Optional[Union[int, float]]) -> Optional[float]:
         return np.nan
     if code == 2:  # Trump
         return 1.0
-    elif code == 1:  # Harris
-        return 0.0
-    return np.nan
+    return 0.0 # anything else
 
 poll_df['harris_preference'] = poll_df['CC24_364b'].apply(get_harris_preference)
 poll_df['trump_preference'] = poll_df['CC24_364b'].apply(get_trump_preference)
@@ -227,6 +222,13 @@ def create_scatter(
     ax.text(0.95, 0.05, f"Polls underestimated\n{candidate} Support", transform=ax.transAxes, 
             fontsize=11, horizontalalignment='right', verticalalignment='bottom')
 
+    # Calculate and display Root Mean Squared Error (RMSE)
+    rmse = np.sqrt(np.mean((x - y) ** 2))
+    # Position the RMSE text below the x-axis label at the bottom right
+    ax.text(0.95, -0.05, f"RMSE: {rmse:.2f}", 
+            transform=ax.transAxes,
+            fontsize=11, horizontalalignment='right')
+
     # Add gridlines
     ax.grid(True, linestyle="--", alpha=0.6)
     
@@ -242,7 +244,7 @@ def create_scatter(
 # Harris plots (now first)
 create_scatter(
     axes[0, 0],
-    merged_all["harris_share"],  # x-axis is now the actual vote share
+    merged_all["harris_share"],  # x-axis is now the actual vote share (including third parties)
     merged_all["harris_poll_all"],  # y-axis is now the poll estimate
     "Harris: Raw Poll Estimate vs. Actual Vote Share",
     "Final Harris Popular Vote Share",
@@ -254,7 +256,7 @@ create_scatter(
 
 create_scatter(
     axes[0, 1],
-    merged_likely["harris_share"],  # x-axis is now the actual vote share
+    merged_likely["harris_share"],  # x-axis is now the actual vote share (including third parties)
     merged_likely["harris_poll_likely"],  # y-axis is now the poll estimate
     "Harris: Turnout-Adjusted Poll Estimate vs. Actual Vote Share",
     "Final Harris Popular Vote Share",
@@ -267,7 +269,7 @@ create_scatter(
 # Trump plots (now second)
 create_scatter(
     axes[1, 0],
-    merged_all["trump_share"],  # x-axis is now the actual vote share
+    merged_all["trump_share"],  # x-axis is now the actual vote share (including third parties)
     merged_all["trump_poll_all"],  # y-axis is now the poll estimate
     "Trump: Raw Poll Estimate vs. Actual Vote Share",
     "Final Trump Popular Vote Share",
@@ -279,7 +281,7 @@ create_scatter(
 
 create_scatter(
     axes[1, 1],
-    merged_likely["trump_share"],  # x-axis is now the actual vote share
+    merged_likely["trump_share"],  # x-axis is now the actual vote share (including third parties)
     merged_likely["trump_poll_likely"],  # y-axis is now the poll estimate
     "Trump: Turnout-Adjusted Poll Estimate vs. Actual Vote Share",
     "Final Trump Popular Vote Share",
