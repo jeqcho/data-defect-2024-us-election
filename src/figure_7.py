@@ -45,55 +45,76 @@ def plot_z_scores(data, candidate, ax):
     share_col = f"{candidate}_share"
 
     # Plot the data points
-    points = []
-    
+    texts = []
     for _, row in data.iterrows():
         x_pos = math.log10(row["total_votes"])
         y_pos = row[z_score_col]
-        
+
         # Add scatter points
         ax.scatter(x_pos, y_pos, color=row["color"], s=50)
-        
-        # Create annotation with arrow
-        ax.annotate(
-            row["state_abbr"],
-            xy=(x_pos, y_pos),
-            xytext=(x_pos, y_pos + 0.5),  # Offset text slightly
-            color=row["color"],
-            fontsize=8,
-            fontweight='bold',
-            ha='center',
-            va='center',
-            arrowprops=dict(
-                arrowstyle='->',
-                color=row["color"],
-                lw=0.5,
-                shrinkA=5,  # Increase shrinkA to prevent arrows from striking through text
-                shrinkB=5
+
+        # Only add text for specific states
+        if row["state_abbr"] in [
+            "VT",
+            "HI",
+            "DC",
+            "CA",
+            "TX",
+            "FL",
+            "ME",
+            "ID",
+            "AK",
+            "RI",
+            "WY",
+            "DE",
+        ]:
+            texts.append(
+                ax.annotate(
+                    row["state_abbr"],
+                    xy=(x_pos, y_pos),
+                    xytext=(x_pos, y_pos),  # Offset text slightly
+                    color=row["color"],
+                    fontsize=8,
+                    fontweight="bold",
+                    ha="center",
+                    va="center",
+                    arrowprops=dict(
+                        arrowstyle="-",
+                        color=row["color"],
+                        lw=0.5,
+                        shrinkA=5,
+                        shrinkB=5,
+                    ),
+                )
             )
-        )
+    adjust_text(
+        texts,
+        x=math.log10(row["total_votes"]),
+        y=row[z_score_col],
+        ax=ax,
+        expand=(4, 4),
+    )
 
     # Shade the y-axis range -2 to 2 in gray
     ax.axhspan(-2, 2, alpha=0.2, color="gray")
 
     # Set labels and title
-    ax.set_xlabel("Log10 Total Votes")
-    ax.set_ylabel("Z_n")
-    ax.set_title(f"{candidate.capitalize()} Z-scores by State")
+    ax.set_xlabel("$log_{10}$(Total Voters)")
+    ax.set_ylabel(f"{candidate.capitalize()} " + "${Z_n}$")
     ax.grid(True, alpha=0.3)
 
     # Set y-axis limits from -15 to 5
-    ax.set_ylim(-17, 7)
+    ax.set_ylim(-20, 7)
 
     # Set custom y-axis ticks at -10, -5, -2, 0, 2, 5
     ax.yaxis.set_major_locator(FixedLocator([-10, -5, -2, 0, 2, 5]))
     # Format the tick labels
-    ax.set_yticklabels(['-10', '-5', '-2', '0', '2', '5'])
+    ax.set_yticklabels(["-10", "-5", "-2", "0", "2", "5"])
 
     # Set custom x-axis ticks at 5.5, 6, 6.5, 7
     ax.xaxis.set_major_locator(FixedLocator([5.5, 6, 6.5, 7]))
     # Format the x-axis tick labels
-    ax.set_xticklabels(['5.5', '6.0', '6.5', '7.0'])
+    ax.set_xticklabels(["5.5", "6.0", "6.5", "7.0"])
     # Set x-axis limits to match the ticks
     ax.set_xlim(5.3, 7.4)
 
@@ -130,6 +151,22 @@ def main():
     # Convert the classification to colors
     print(merged_data.columns)
     merged_data["color"] = merged_data["Pre-Election Classification"].map(color_map)
+
+    # Save data to CSV file
+    output_columns = [
+        "state",
+        "state_abbr",
+        "harris_Z_n",
+        "trump_Z_n",
+        "total_votes",
+        "harris_poll_all",
+        "harris_share",
+        "trump_poll_all",
+        "trump_share",
+        "num_respondents_all",
+        "Pre-Election Classification",
+    ]
+    merged_data[output_columns].to_csv("../data/figure_7.csv", index=False)
 
     # Create figure and subplots side by side
     fig, axes = plt.subplots(1, 2, figsize=(15, 6))
