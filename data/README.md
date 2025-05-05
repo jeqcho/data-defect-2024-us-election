@@ -7,3 +7,4 @@
 - `2024_us_election_results_by_state.csv` is from `src/scrape_ap_results.ipynb`.
 - `State-Pre-ElectionClassification.csv` is from a Perplexity [search](https://www.perplexity.ai/search/for-the-us-2024-election-which-ykL4.tR3T7WPD.u9TNCGWQ#1) with some edits to fill in the 50 states.
 - `merged_all_voters.csv` and `merged_likely_voters.csv` are from `src/figure_4.py`.
+- `state_abbr.csv` is generated from 3.7 Sonnet.
