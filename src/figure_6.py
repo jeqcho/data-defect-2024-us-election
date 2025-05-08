@@ -50,12 +50,12 @@ data['log_trump_Z_n_N'] = np.log10(np.abs(data['trump_Z_n_N']))
 data['log_harris_Z_n_N'] = np.log10(np.abs(data['harris_Z_n_N']))
 
 # Set up the figure with two subplots
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
 
 # Helper function to create each plot with regression
 def create_plot(ax, x, y, colors, candidate_name):
     # Scatter plot
-    ax.scatter(x, y, c=colors, s=80)
+    ax.scatter(x, y, c=colors, s=30)
     
     # Linear regression
     mask = ~np.isnan(x) & ~np.isnan(y)
@@ -134,17 +134,7 @@ x_ticks = [5.5, 6.0, 6.5, 7.0]
 ax1.set_xticks(x_ticks)
 ax2.set_xticks(x_ticks)
 
-# Add a legend
-legend_elements = [
-    mpatches.Patch(color='blue', label='Blue states'),
-    mpatches.Patch(color='red', label='Red states'),
-    mpatches.Patch(color='green', label='Swing states')
-]
-fig.legend(handles=legend_elements, loc='upper center', bbox_to_anchor=(0.5, 0.05), 
-           ncol=3, fontsize=12)
-
 plt.tight_layout()
-fig.subplots_adjust(bottom=0.15)  # Make space for the legend
 
 # Create figures directory if it doesn't exist
 os.makedirs('../figures', exist_ok=True)
