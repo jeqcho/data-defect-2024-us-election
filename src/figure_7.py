@@ -44,6 +44,19 @@ def plot_z_scores(data, candidate, ax):
     poll_col = f"{candidate}_poll_all"
     share_col = f"{candidate}_share"
 
+    # Filter blue and red states
+    blue_states = data[data["color"] == "blue"].copy()
+    red_states = data[data["color"] == "red"].copy()
+    
+    # Sort by total_votes to find top 3 and bottom 3 for each color
+    blue_largest = blue_states.nlargest(3, "total_votes")
+    blue_smallest = blue_states.nsmallest(3, "total_votes")
+    red_largest = red_states.nlargest(3, "total_votes")
+    red_smallest = red_states.nsmallest(3, "total_votes")
+    
+    # Combine states to label
+    states_to_label = pd.concat([blue_largest, blue_smallest, red_largest, red_smallest])
+    
     # Plot the data points
     texts = []
     for _, row in data.iterrows():
@@ -51,55 +64,30 @@ def plot_z_scores(data, candidate, ax):
         y_pos = row[z_score_col]
 
         # Add scatter points
-        ax.scatter(x_pos, y_pos, color=row["color"], s=50)
+        ax.scatter(x_pos, y_pos, color=row["color"], s=10)
 
-        # Only add text for specific states
-        if row["state_abbr"] in [
-            "VT",
-            "HI",
-            "DC",
-            "CA",
-            "TX",
-            "FL",
-            "ME",
-            "ID",
-            "AK",
-            "RI",
-            "WY",
-            "DE",
-        ]:
+        # Only add text for states in our filtered list
+        if row["state_abbr"] in states_to_label["state_abbr"].values:
             texts.append(
                 ax.annotate(
                     row["state_abbr"],
                     xy=(x_pos, y_pos),
-                    xytext=(x_pos, y_pos),  # Offset text slightly
                     color=row["color"],
-                    fontsize=8,
-                    fontweight="bold",
-                    ha="center",
-                    va="center",
+                    size=8,
                     arrowprops=dict(
                         arrowstyle="-",
                         color=row["color"],
                         lw=0.5,
-                        shrinkA=5,
-                        shrinkB=5,
                     ),
                 )
             )
-    adjust_text(
-        texts,
-        x=math.log10(row["total_votes"]),
-        y=row[z_score_col],
-        ax=ax,
-        expand=(4, 4),
-    )
+    
 
     # Shade the y-axis range -2 to 2 in gray
     ax.axhspan(-2, 2, alpha=0.2, color="gray")
 
     # Set labels and title
-    ax.set_xlabel("$log_{10}$(Total Voters)")
+    ax.set_xlabel("$\log_{10}$(Total Voters)")
     ax.set_ylabel(f"{candidate.capitalize()} " + "${Z_n}$")
     ax.grid(True, alpha=0.3)
 
@@ -117,6 +105,17 @@ def plot_z_scores(data, candidate, ax):
     ax.set_xticklabels(["5.5", "6.0", "6.5", "7.0"])
     # Set x-axis limits to match the ticks
     ax.set_xlim(5.3, 7.4)
+    
+    x = [math.log10(row["total_votes"]) for _,row in data.iterrows()]
+    y = [row[z_score_col] for _,row in data.iterrows()]
+    adjust_text(
+        texts,
+        objects=texts,
+        x=x,
+        y=y,
+        ax=ax,
+        expand=(2, 2),
+    )
 
 
 def main():
@@ -169,7 +168,7 @@ def main():
     merged_data[output_columns].to_csv("../data/figure_7.csv", index=False)
 
     # Create figure and subplots side by side
-    fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+    fig, axes = plt.subplots(1, 2, figsize=(8, 3))
 
     # Plot for Harris on the left
     plot_z_scores(merged_data, "harris", axes[0])
