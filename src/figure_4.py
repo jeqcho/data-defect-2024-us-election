@@ -162,7 +162,7 @@ merged_likely.to_csv("../data/merged_likely_voters.csv", index=False)
 
 # %%
 # Create 4 plots (2 for each candidate)
-fig, axes = plt.subplots(2, 2, figsize=(16, 14))
+fig, axes = plt.subplots(2, 2, figsize=(8, 7))
 plt.subplots_adjust(hspace=0.3, wspace=0.3)
 
 # Helper function to create scatter plots
@@ -202,8 +202,7 @@ def create_scatter(
             colors.append("red")
     
     # Create scatter plot with colors
-    ax.scatter(x, y, alpha=0.7, c=colors)
-    ax.set_title(title, fontsize=14)
+    ax.scatter(x, y, alpha=0.7, c=colors, s=5)
     ax.set_xlabel(xlabel, fontsize=12)
     ax.set_ylabel(ylabel, fontsize=12)
 
@@ -221,29 +220,21 @@ def create_scatter(
     ax.plot([0, 1], [0, 1], "k--")
     
     # Add overestimated/underestimated labels
-    ax.text(0.05, 0.85, f"Polls overestimated\n{candidate} Support", transform=ax.transAxes, 
+    ax.text(0.05, 0.95, f"Polls overestimated\n{candidate} support", transform=ax.transAxes, 
             fontsize=11, horizontalalignment='left', verticalalignment='top')
-    ax.text(0.95, 0.05, f"Polls underestimated\n{candidate} Support", transform=ax.transAxes, 
+    ax.text(0.95, 0.05, f"Polls underestimated\n{candidate} support", transform=ax.transAxes, 
             fontsize=11, horizontalalignment='right', verticalalignment='bottom')
 
     # Calculate and display Root Mean Squared Error (RMSE)
     rmse = np.sqrt(np.mean((x - y) ** 2))
-    # Position the RMSE text below the x-axis label at the bottom right
-    ax.text(0.95, -0.05, f"RMSE: {rmse:.2f}", 
+    # Position the RMSE text below the x-axis title
+    ax.text(0.95, -0.25, f"RMSE: {rmse:.2f}", 
             transform=ax.transAxes,
             fontsize=11, horizontalalignment='right')
 
     # Add gridlines
     ax.grid(True, linestyle="--", alpha=0.6)
     
-    # Add legend for state classifications
-    from matplotlib.lines import Line2D
-    legend_elements = [
-        Line2D([0], [0], marker='o', color='w', markerfacecolor='red', markersize=10, label='Red States'),
-        Line2D([0], [0], marker='o', color='w', markerfacecolor='blue', markersize=10, label='Blue States'),
-        Line2D([0], [0], marker='o', color='w', markerfacecolor='green', markersize=10, label='Swing States')
-    ]
-    ax.legend(handles=legend_elements, loc='upper left')
 
 # Harris plots (now first)
 create_scatter(
