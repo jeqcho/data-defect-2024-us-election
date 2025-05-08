@@ -286,10 +286,10 @@ create_scatter(
     "Trump"
 )
 
-plt.suptitle(
-    "Comparison of Pre-Election Poll Estimates vs. Actual Vote Share by State",
-    fontsize=18,
-)
+# plt.suptitle(
+#     "Comparison of Pre-Election Poll Estimates vs. Actual Vote Share by State",
+#     fontsize=18,
+# )
 plt.tight_layout()
 plt.savefig("../figures/figure_4.png", dpi=300, bbox_inches="tight")
 
