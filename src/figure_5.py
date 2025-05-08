@@ -54,6 +54,7 @@ def plot_histogram(ax, data: pd.Series, candidate: str) -> None:
     ax.set_ylim([0, 12])
     ax.set_xticks([-0.010, -0.005, 0, 0.005, 0.010])
     ax.set_xticklabels(["-0.010", "-0.005", "0", "0.005", "0.010"])
+    ax.set_yticks([0, 4, 8, 12])
     ax.grid(True, alpha=0.3, zorder=0)  # Set grid with low zorder
     
     # Plot histogram with higher zorder to appear on top of grid
@@ -68,7 +69,7 @@ def plot_histogram(ax, data: pd.Series, candidate: str) -> None:
     textstr = f"{mean_rounded} ± {std_err_rounded}"
     ax.text(
         0.95,
-        0.95,
+        0.90,
         textstr,
         transform=ax.transAxes,
         fontsize=8,
