@@ -14,6 +14,7 @@ import numpy as np
 import matplotlib.patches as patches
 from scipy import stats
 import os
+from typing import List, Tuple
 
 # Set the current working directory to the script directory
 script_dir: str = os.path.dirname(os.path.abspath(__file__))
@@ -23,79 +24,62 @@ os.chdir(script_dir)
 df = pd.read_csv("../data/figure_5.csv")
 
 # Create figure with two subplots
-fig, axes = plt.subplots(1, 2, figsize=(12, 6))
-fig.suptitle("Figure 5: Data Defect Correlation Histograms", fontsize=16)
+fig, axes = plt.subplots(1, 2, figsize=(9, 2.5))
 
-# Calculate statistics for Harris
+# Calculate statistics for each candidate
 harris_data = df["harris_data_defect_correlation"]
-harris_mean = harris_data.mean()
-harris_std_err = stats.sem(harris_data)  # Standard Error of the Mean
-
-# Calculate statistics for Trump
 trump_data = df["trump_data_defect_correlation"]
-trump_mean = trump_data.mean()
-trump_std_err = stats.sem(trump_data)  # Standard Error of the Mean
-
-# Set up axes for Harris histogram (first subplot)
-axes[0].set_xlabel(r"Harris $\hat{\rho}_N$")
-axes[0].set_ylabel("Count")
-axes[0].set_xlim([-0.01, 0.01])
-axes[0].set_xticks([-0.010, -0.005, 0, 0.005, 0.010])
-axes[0].set_xticklabels(["-0.010", "-0.005", "0", "0.005", "0.010"])
-axes[0].grid(True, alpha=0.3, zorder=0)  # Set grid with low zorder
-# Plot Harris histogram with higher zorder to appear on top of grid
-axes[0].hist(harris_data, bins=15, color="gray", zorder=3)
-axes[0].axvline(x=0, color="black", linestyle=":", alpha=0.7, zorder=2)
-
-# Set up axes for Trump histogram (second subplot)
-axes[1].set_xlabel(r"Trump $\hat{\rho}_N$")
-axes[1].set_ylabel("Count")
-axes[1].set_xlim([-0.01, 0.01])
-axes[1].set_xticks([-0.010, -0.005, 0, 0.005, 0.010])
-axes[1].set_xticklabels(["-0.010", "-0.005", "0", "0.005", "0.010"])
-axes[1].grid(True, alpha=0.3, zorder=0)  # Set grid with low zorder
-# Plot Trump histogram with higher zorder to appear on top of grid
-axes[1].hist(trump_data, bins=15, color="gray", zorder=3)
-axes[1].axvline(x=0, color="black", linestyle=":", alpha=0.7, zorder=2)
-
 
 def to_2sf(i: float) -> str:
+    """Convert a float to a string with 2 significant figures."""
     return f"{float(f'{i:.2g}'):g}"
 
+def plot_histogram(ax, data: pd.Series, candidate: str) -> None:
+    """
+    Plot histogram for a candidate's data defect correlation.
+    
+    Args:
+        ax: Matplotlib axis to plot on
+        data: Series containing the data defect correlation values
+        candidate: Name of the candidate (Harris or Trump)
+    """
+    # Calculate statistics
+    mean = data.mean()
+    std_err = stats.sem(data)  # Standard Error of the Mean
+    
+    # Set up axes
+    ax.set_xlabel(f"{candidate} $\\hat{{\\rho}}_N$")
+    ax.set_ylabel("Count")
+    ax.set_xlim([-0.01, 0.01])
+    ax.set_ylim([0, 12])
+    ax.set_xticks([-0.010, -0.005, 0, 0.005, 0.010])
+    ax.set_xticklabels(["-0.010", "-0.005", "0", "0.005", "0.010"])
+    ax.grid(True, alpha=0.3, zorder=0)  # Set grid with low zorder
+    
+    # Plot histogram with higher zorder to appear on top of grid
+    ax.hist(data, bins=15, color="gray", zorder=3)
+    ax.axvline(x=0, color="black", linestyle=":", alpha=0.7, zorder=2)
+    
+    # Add text box with mean ± std_err
+    props = dict(boxstyle="round", facecolor="white", alpha=0.7)
+    mean_rounded = to_2sf(mean)
+    std_err_rounded = to_2sf(std_err)
+    
+    textstr = f"{mean_rounded} ± {std_err_rounded}"
+    ax.text(
+        0.95,
+        0.95,
+        textstr,
+        transform=ax.transAxes,
+        fontsize=8,
+        verticalalignment="top",
+        horizontalalignment="right",
+        bbox=props,
+    )
 
-# Add text boxes with mean ± 2*std_err (2 significant figures but 4 decimal places)
-# For Harris
-props = dict(boxstyle="round", facecolor="white", alpha=0.7)
-harris_mean_rounded = to_2sf(harris_mean)
-harris_std_err_rounded = to_2sf(harris_std_err)
-
-textstr = f"{harris_mean_rounded} ± {harris_std_err_rounded}"
-axes[0].text(
-    0.95,
-    0.95,
-    textstr,
-    transform=axes[0].transAxes,
-    fontsize=10,
-    verticalalignment="top",
-    horizontalalignment="right",
-    bbox=props,
-)
-
-# For Trump
-trump_mean_rounded = to_2sf(trump_mean)
-trump_std_err_rounded = to_2sf(trump_std_err)
-
-textstr = f"{trump_mean_rounded} ± {trump_std_err_rounded}"
-axes[1].text(
-    0.95,
-    0.95,
-    textstr,
-    transform=axes[1].transAxes,
-    fontsize=10,
-    verticalalignment="top",
-    horizontalalignment="right",
-    bbox=props,
-)
+# Plot histograms for both candidates
+plot_histogram(axes[0], harris_data, "Harris")
+plot_histogram(axes[1], trump_data, "Trump")
 
 # Adjust layout and save figure
 plt.tight_layout()
