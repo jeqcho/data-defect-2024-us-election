@@ -10,3 +10,4 @@
 - `state_abbr.csv` is generated from 3.7 Sonnet.
 - `figure_*.csv` is generated from `src/figure_*.py` files
 - `effective_sample_size.csv` is generated from `src/effective_sample_size.py`
+- Turnout datasets are from the [Election Lab of the University of Florida](https://election.lab.ufl.edu/dataset/2024-general-election-turnout-rates-v0-3/)
