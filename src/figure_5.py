@@ -10,18 +10,17 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
-import matplotlib.patches as patches
 from scipy import stats
 import os
-from typing import List, Tuple
 
 # Set the current working directory to the script directory
 script_dir: str = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
 # Read the dataset
-df = pd.read_csv("../data/figure_5.csv")
+suffix = "_likely"
+# suffix = ""
+df = pd.read_csv(f"../data/figure_5{suffix}.csv")
 
 # Create figure with two subplots
 fig, axes = plt.subplots(1, 2, figsize=(9, 2.5))
@@ -85,4 +84,4 @@ plot_histogram(axes[1], trump_data, "Trump")
 # Adjust layout and save figure
 plt.tight_layout()
 plt.subplots_adjust(top=0.9)
-plt.savefig("../figures/figure_5.png", dpi=300, bbox_inches="tight")
+plt.savefig(f"../figures/figure_5{suffix}.png", dpi=300, bbox_inches="tight")

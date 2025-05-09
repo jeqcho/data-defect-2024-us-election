@@ -30,6 +30,16 @@ from adjustText import adjust_text  # Import the adjust_text method
 script_dir: str = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
+# Customize
+# total_votes_or_sample_size = "total_votes"
+total_votes_or_sample_size = "num_respondents_all"
+
+# all_or_likely = "likely"
+all_or_likely = "all"
+
+# suffix = "_likely"
+suffix = ""
+
 
 def plot_z_scores(data, candidate, ax):
     """
@@ -41,18 +51,16 @@ def plot_z_scores(data, candidate, ax):
     - ax: Matplotlib axis to plot on
     """
     z_score_col = f"{candidate}_Z_n"
-    poll_col = f"{candidate}_poll_all"
-    share_col = f"{candidate}_share"
 
     # Filter blue and red states
     blue_states = data[data["color"] == "blue"].copy()
     red_states = data[data["color"] == "red"].copy()
     
     # Sort by total_votes to find top 3 and bottom 3 for each color
-    blue_largest = blue_states.nlargest(3, "total_votes")
-    blue_smallest = blue_states.nsmallest(3, "total_votes")
-    red_largest = red_states.nlargest(3, "total_votes")
-    red_smallest = red_states.nsmallest(3, "total_votes")
+    blue_largest = blue_states.nlargest(3, total_votes_or_sample_size)
+    blue_smallest = blue_states.nsmallest(3, total_votes_or_sample_size)
+    red_largest = red_states.nlargest(3, total_votes_or_sample_size)
+    red_smallest = red_states.nsmallest(3, total_votes_or_sample_size)
     
     # Combine states to label
     states_to_label = pd.concat([blue_largest, blue_smallest, red_largest, red_smallest])
@@ -60,7 +68,7 @@ def plot_z_scores(data, candidate, ax):
     # Plot the data points
     texts = []
     for _, row in data.iterrows():
-        x_pos = math.log10(row["total_votes"])
+        x_pos = math.log10(row[total_votes_or_sample_size])
         y_pos = row[z_score_col]
 
         # Add scatter points
@@ -87,7 +95,10 @@ def plot_z_scores(data, candidate, ax):
     ax.axhspan(-2, 2, alpha=0.2, color="gray")
 
     # Set labels and title
-    ax.set_xlabel("$\log_{10}$(Total Voters)")
+    if total_votes_or_sample_size == "total_votes":
+        ax.set_xlabel("$\log_{10}$(Total Voters)")
+    else:
+        ax.set_xlabel("$\log_{10}$(Sample Size)")
     ax.set_ylabel(f"{candidate.capitalize()} " + "${Z_n}$")
     ax.grid(True, alpha=0.3)
 
@@ -100,13 +111,20 @@ def plot_z_scores(data, candidate, ax):
     ax.set_yticklabels(["-10", "-5", "-2", "0", "2", "5"])
 
     # Set custom x-axis ticks at 5.5, 6, 6.5, 7
-    ax.xaxis.set_major_locator(FixedLocator([5.5, 6, 6.5, 7]))
-    # Format the x-axis tick labels
-    ax.set_xticklabels(["5.5", "6.0", "6.5", "7.0"])
-    # Set x-axis limits to match the ticks
-    ax.set_xlim(5.3, 7.4)
+    if total_votes_or_sample_size == "total_votes":
+        ax.xaxis.set_major_locator(FixedLocator([5.5, 6, 6.5, 7]))
+        # Format the x-axis tick labels
+        ax.set_xticklabels(["5.5", "6.0", "6.5", "7.0"])
+        # Set x-axis limits to match the ticks
+        ax.set_xlim(5.3, 7.4)
+    else:
+        ax.xaxis.set_major_locator(FixedLocator([2.0, 2.5, 3.0, 3.5]))
+        # Format the x-axis tick labels
+        ax.set_xticklabels(["2.0", "2.5", "3.0", "3.5"])
+        # Set x-axis limits to match the ticks
+        ax.set_xlim(1.6, 3.9)
     
-    x = [math.log10(row["total_votes"]) for _,row in data.iterrows()]
+    x = [math.log10(row[total_votes_or_sample_size]) for _,row in data.iterrows()]
     y = [row[z_score_col] for _,row in data.iterrows()]
     adjust_text(
         texts,
@@ -120,7 +138,7 @@ def plot_z_scores(data, candidate, ax):
 
 def main():
     # Read the input files
-    merged_data = pd.read_csv("../data/merged_all_voters.csv")
+    merged_data = pd.read_csv(f"../data/merged_{all_or_likely}_voters.csv")
     state_abbr = pd.read_csv("../data/state_abbr.csv")
 
     # Merge state abbreviations with the main data
@@ -128,20 +146,20 @@ def main():
 
     # Compute Z_n for Harris
     merged_data["harris_Z_n"] = (
-        merged_data["harris_poll_all"] - merged_data["harris_share"]
+        merged_data[f"harris_poll_{all_or_likely}"] - merged_data["harris_share"]
     ) / np.sqrt(
-        merged_data["harris_poll_all"]
-        * (1 - merged_data["harris_poll_all"])
-        / merged_data["num_respondents_all"]
+        merged_data[f"harris_poll_{all_or_likely}"]
+        * (1 - merged_data[f"harris_poll_{all_or_likely}"])
+        / merged_data[f"num_respondents_{all_or_likely}"]
     )
 
     # Compute Z_n for Trump
     merged_data["trump_Z_n"] = (
-        merged_data["trump_poll_all"] - merged_data["trump_share"]
+        merged_data[f"trump_poll_{all_or_likely}"] - merged_data["trump_share"]
     ) / np.sqrt(
-        merged_data["trump_poll_all"]
-        * (1 - merged_data["trump_poll_all"])
-        / merged_data["num_respondents_all"]
+        merged_data[f"trump_poll_{all_or_likely}"]
+        * (1 - merged_data[f"trump_poll_{all_or_likely}"])
+        / merged_data[f"num_respondents_{all_or_likely}"]
     )
 
     # Define color mapping for state classification
@@ -158,14 +176,14 @@ def main():
         "harris_Z_n",
         "trump_Z_n",
         "total_votes",
-        "harris_poll_all",
+        f"harris_poll_{all_or_likely}",
         "harris_share",
-        "trump_poll_all",
+        f"trump_poll_{all_or_likely}",
         "trump_share",
-        "num_respondents_all",
+        f"num_respondents_{all_or_likely}",
         "Pre-Election Classification",
     ]
-    merged_data[output_columns].to_csv("../data/figure_7.csv", index=False)
+    merged_data[output_columns].to_csv(f"../data/figure_7{suffix}.csv", index=False)
 
     # Create figure and subplots side by side
     fig, axes = plt.subplots(1, 2, figsize=(8, 3))
@@ -177,7 +195,7 @@ def main():
     plot_z_scores(merged_data, "trump", axes[1])
 
     plt.tight_layout()
-    plt.savefig("../figures/figure_7.png", dpi=300)
+    plt.savefig(f"../figures/figure_7{suffix}.png", dpi=300)
 
 
 if __name__ == "__main__":

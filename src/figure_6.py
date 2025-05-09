@@ -15,19 +15,17 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.linear_model import LinearRegression
-from scipy import stats
-import matplotlib.patches as mpatches
 import os
-from decimal import Decimal, ROUND_HALF_UP
 
 # Set the current working directory to the script directory
 script_dir: str = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
 # Read the data files
-figure_data = pd.read_csv('../data/figure_6.csv')
+suffix = "_likely"
+# suffix = ""
+figure_data = pd.read_csv(f'../data/figure_6{suffix}.csv')
 classification = pd.read_csv('../data/State-Pre-ElectionClassification.csv')
 
 # Merge the datasets
@@ -138,4 +136,4 @@ plt.tight_layout()
 
 # Create figures directory if it doesn't exist
 os.makedirs('../figures', exist_ok=True)
-plt.savefig('../figures/figure_6.png', dpi=300, bbox_inches='tight')
+plt.savefig(f'../figures/figure_6{suffix}.png', dpi=300, bbox_inches='tight')

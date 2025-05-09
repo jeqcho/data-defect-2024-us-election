@@ -8,7 +8,9 @@ script_dir: str = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
 # Read the input file
-input_file = "../data/figure_5.csv"
+suffix = "_likely"
+# suffix = ""
+input_file = f"../data/figure_5{suffix}.csv"
 print(f"Reading input file: {input_file}")
 df = pd.read_csv(input_file)
 
@@ -45,7 +47,7 @@ result_df = df[['state',
                 'trump_Z_n_N', 'harris_Z_n_N']]
 
 # Save the result to a new CSV file
-output_file = "../data/figure_6.csv"
+output_file = f"../data/figure_6{suffix}.csv"
 result_df.to_csv(output_file, index=False)
 
 print(f"\nComputation completed. Results saved to {output_file}")
