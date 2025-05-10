@@ -176,6 +176,4 @@ cython_debug/
 .DS_Store
 
 # Ignore data directory except for README.md and State-Pre-ElectionClassification.csv
-data/*
-!data/README.md
-!data/State-Pre-ElectionClassification.csv
+data/CES24_Common.csv
