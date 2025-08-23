@@ -177,3 +177,5 @@ cython_debug/
 
 # Ignore data directory except for README.md and State-Pre-ElectionClassification.csv
 data/CES24_Common.csv
+data/CES24_Common-old.csv
+data/CCES24_Common_OUTPUT_vv_topost_final.csv
