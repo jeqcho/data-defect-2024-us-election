@@ -18,8 +18,8 @@ script_dir: str = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
 # Read the dataset
-suffix = "_likely"
-# suffix = ""
+# suffix = "_likely"
+suffix = ""
 df = pd.read_csv(f"../data/figure_5{suffix}.csv")
 
 # Create figure with two subplots
@@ -56,9 +56,15 @@ def plot_histogram(ax, data: pd.Series, candidate: str) -> None:
     ax.set_yticks([0, 4, 8, 12])
     ax.grid(True, alpha=0.3, zorder=0)  # Set grid with low zorder
     
-    # Plot histogram with higher zorder to appear on top of grid
+    # Add shaded region for standard error
+    ax.axvspan(mean - std_err, mean + std_err, alpha=0.2, color='gray', zorder=1, label='±2 SE')
+    
+    # Plot histogram with higher zorder to appear on top of grid and shade
     ax.hist(data, bins=15, color="gray", zorder=3)
     ax.axvline(x=0, color="black", linestyle=":", alpha=0.7, zorder=2)
+    
+    # Add solid vertical line at the mean
+    ax.axvline(x=mean, color="black", linestyle="-", linewidth=1)
     
     # Add text box with mean ± std_err
     props = dict(boxstyle="round", facecolor="white", alpha=0.7)
