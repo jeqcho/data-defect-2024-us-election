@@ -18,8 +18,8 @@ script_dir: str = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
 # Read the dataset
-# suffix = "_likely"
-suffix = ""
+suffix = "_likely"
+# suffix = "_validated"
 df = pd.read_csv(f"../data/figure_5{suffix}.csv")
 
 # Create figure with two subplots

@@ -8,7 +8,7 @@ script_dir: str = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
 # Read the input file
-suffix = "_likely"
+suffix = "_validated"
 # suffix = ""
 input_file = f"../data/figure_5{suffix}.csv"
 print(f"Reading input file: {input_file}")

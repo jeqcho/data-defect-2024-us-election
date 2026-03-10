@@ -23,7 +23,7 @@ script_dir: str = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
 # Read the data files
-suffix = "_likely"
+suffix = "_validated"
 # suffix = ""
 figure_data = pd.read_csv(f'../data/figure_6{suffix}.csv')
 classification = pd.read_csv('../data/State-Pre-ElectionClassification.csv')

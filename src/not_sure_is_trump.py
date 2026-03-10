@@ -18,8 +18,7 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes  # Fix the linter error by importing Axes directly
 import numpy as np
 import os
-import seaborn as sns
-from typing import Dict, List, Optional, Union, Tuple, Any, Callable
+from typing import Dict, List, Optional, Union
 
 # Set the current working directory to the script directory
 script_dir: str = os.path.dirname(os.path.abspath(__file__))
@@ -40,7 +39,7 @@ classification_df: pd.DataFrame = pd.read_csv(classification_path)
 election_df["trump_share"] = election_df["trump_votes"] / election_df["total_votes"]
 
 # Read the poll data
-poll_path: str = "../data/CES24_Common.csv"
+poll_path: str = "../data/CCES24_Common_OUTPUT_vv_topost_final.csv"
 poll_df: pd.DataFrame = pd.read_csv(poll_path)
 
 # Define response code mappings
@@ -50,6 +49,7 @@ likely_voter_codes: List[int] = [1, 2, 3, 4]  # Codes for respondents likely to 
 
 # Process the data
 poll_df['is_likely_voter'] = poll_df['CC24_363'].isin(likely_voter_codes)
+poll_df['is_validated_voter'] = (~poll_df['TS_g2024'].isna()) & (poll_df['TS_g2024'] < 7)
 
 def get_trump_preference(code: Optional[Union[int, float]]) -> Optional[float]:
     """
@@ -84,6 +84,13 @@ state_polls_likely: pd.DataFrame = likely_voters.groupby('inputstate').agg({
     'caseid': 'count'  # Count number of respondents per state
 }).reset_index()
 
+# 3. Validated voters
+validated_voters: pd.DataFrame = poll_df[poll_df['is_validated_voter'] & ~poll_df['trump_preference'].isna()]
+state_polls_validated: pd.DataFrame = validated_voters.groupby('inputstate').agg({
+    'trump_preference': 'mean',
+    'caseid': 'count'  # Count number of respondents per state
+}).reset_index()
+
 # Rename columns for clarity
 state_polls_all.rename(columns={
     'trump_preference': 'trump_poll_all',
@@ -93,6 +100,11 @@ state_polls_all.rename(columns={
 state_polls_likely.rename(columns={
     'trump_preference': 'trump_poll_likely',
     'caseid': 'num_respondents_likely'
+}, inplace=True)
+
+state_polls_validated.rename(columns={
+    'trump_preference': 'trump_poll_validated',
+    'caseid': 'num_respondents_validated'
 }, inplace=True)
 
 # Create a mapping from FIPS state codes to state names
@@ -115,15 +127,18 @@ fips_to_state: Dict[int, str] = {
 # Ensure inputstate is treated as int
 state_polls_all['inputstate'] = state_polls_all['inputstate'].astype(int)
 state_polls_likely['inputstate'] = state_polls_likely['inputstate'].astype(int)
+state_polls_validated['inputstate'] = state_polls_validated['inputstate'].astype(int)
 
 # Map FIPS codes to state names
 state_polls_all['state'] = state_polls_all['inputstate'].map(fips_to_state)
 state_polls_likely['state'] = state_polls_likely['inputstate'].map(fips_to_state)
+state_polls_validated['state'] = state_polls_validated['inputstate'].map(fips_to_state)
 
 # Normalize case for state names to ensure proper matching
 election_df['state'] = election_df['state'].str.title()
 state_polls_all['state'] = state_polls_all['state'].str.title()
 state_polls_likely['state'] = state_polls_likely['state'].str.title()
+state_polls_validated['state'] = state_polls_validated['state'].str.title()
 
 # Normalize case for state names
 classification_df['State'] = classification_df['State'].str.strip('"').str.title()
@@ -134,16 +149,18 @@ election_df = election_df.merge(classification_df, left_on='state', right_on='St
 # Now merge with poll data
 merged_all = election_df.merge(state_polls_all, on='state', how='inner')
 merged_likely = election_df.merge(state_polls_likely, on='state', how='inner')
+merged_validated = election_df.merge(state_polls_validated, on='state', how='inner')
 
 # Save the merged DataFrames to CSV
 merged_all.to_csv("../data/merged_all_voters_not_sure_is_trump.csv", index=False)
 merged_likely.to_csv("../data/merged_likely_voters_not_sure_is_trump.csv", index=False)
+merged_validated.to_csv("../data/merged_validated_voters_not_sure_is_trump.csv", index=False)
 
 # Scatter plot functions
 
 # %%
-# Create 2 plots for Trump only
-fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+# Create 3 plots for Trump only
+fig, axes = plt.subplots(1, 3, figsize=(18, 5))
 plt.subplots_adjust(wspace=0.3)
 
 # Helper function to create scatter plots
@@ -237,6 +254,17 @@ create_scatter(
     "Turnout-Adjusted Poll Estimate,\nTrump Support",
     merged_likely["state"],
     merged_likely["Pre-Election Classification"]
+)
+
+create_scatter(
+    axes[2],
+    merged_validated["trump_share"],  # x-axis is now the actual vote share (including third parties)
+    merged_validated["trump_poll_validated"],  # y-axis is now the poll estimate
+    "Trump: Validated Voters Poll Estimate vs. Actual Vote Share\n(Including 'Not Sure' as Trump)",
+    "Final Trump Popular Vote Share",
+    "Validated Voters Poll Estimate,\nTrump Support",
+    merged_validated["state"],
+    merged_validated["Pre-Election Classification"]
 )
 
 plt.tight_layout()

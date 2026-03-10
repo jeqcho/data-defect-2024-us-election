@@ -1,8 +1,8 @@
 # the goal of this script is to compute a dataset
-# input: ../data/merged_all_voters.csv
+# input: ../data/merged_validated_voters.csv
 # output: ../data/figure_5.csv
 
-# first you should read merged_all_voters.csv to understand the columns, and read the first few rows to understand the data types
+# first you should read merged_validated_voters.csv to understand the columns, and read the first few rows to understand the data types
 
 # the output dataset has each row corresponding to each state
 
@@ -19,12 +19,10 @@ import pandas as pd
 import numpy as np
 
 
-# all_or_likely = "all"
-all_or_likely = "likely"
-
 # Read the input data
-input_file = "data/merged_likely_voters.csv"
-output_file = "data/figure_5_likely.csv" if all_or_likely == 'likely' else "data/figure_5.csv"
+suffix = "validated"
+input_file = "data/merged_validated_voters.csv"
+output_file = "data/figure_5_validated.csv"
 
 # Read the data
 df = pd.read_csv(input_file)
@@ -35,8 +33,8 @@ results["state"] = df["state"]
 
 # Calculate the first quantity: trump_error and harris_error
 # error = poll - actual share
-results["trump_error"] = df[f"trump_poll_{all_or_likely}"] - df["trump_share"]
-results["harris_error"] = df[f"harris_poll_{all_or_likely}"] - df["harris_share"]
+results["trump_error"] = df[f"trump_poll_{suffix}"] - df["trump_share"]
+results["harris_error"] = df[f"harris_poll_{suffix}"] - df["harris_share"]
 
 # Calculate the second quantity: sigma_g (standard deviation of vote share)
 # For simplicity, we'll use the sample proportion as an estimate for sigma_g
@@ -45,7 +43,7 @@ results["trump_sigma_g"] = np.sqrt(df["trump_share"] * (1 - df["trump_share"]))
 results["harris_sigma_g"] = np.sqrt(df["harris_share"] * (1 - df["harris_share"]))
 
 # Calculate the third quantity: sample_ratio (num_respondents_{all_or_likely} / total_votes)
-results["sample_ratio"] = df[f"num_respondents_{all_or_likely}"] / df["total_votes"]
+results["sample_ratio"] = df[f"num_respondents_{suffix}"] / df["total_votes"]
 
 # Calculate the fourth quantity: data_defect_correlation
 # error/(sigma_g * sqrt((1-f)/f)) where f is the sample_ratio
@@ -62,7 +60,7 @@ results["harris_data_defect_correlation"] = results["harris_error"] / (
 )
 
 # store the sample size
-results["sample_size"] = df[f"num_respondents_{all_or_likely}"]
+results["sample_size"] = df[f"num_respondents_{suffix}"]
 results["total_votes"] = df["total_votes"]
 
 # Save the output

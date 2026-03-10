@@ -10,7 +10,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
 # Read the CSV file
-file_path = '../data/CES24_Common.csv'
+file_path = '../data/CCES24_Common_OUTPUT_vv_topost_final.csv'
 try:
     print(f"Current working directory: {os.getcwd()}")
     print(f"Attempting to read file: {os.path.abspath(file_path)}")
@@ -34,18 +34,18 @@ try:
     print("\nFirst 5 rows of the dataset:")
     print(df.head())
     
-    # Get counts of values in the 'tookpost' column
-    if 'tookpost' in df.columns:
-        print("\nCounts of values in 'tookpost' column:")
-        tookpost_counts = df['tookpost'].value_counts(dropna=False)
-        print(tookpost_counts)
+    # Get counts of values in the 'CC24_401' column
+    if 'CC24_401' in df.columns:
+        print("\nCounts of values in 'CC24_401' column:")
+        CC24_401_counts = df['CC24_401'].value_counts(dropna=False)
+        print(CC24_401_counts)
         
         # Display percentage distribution
-        print("\nPercentage distribution of 'tookpost' values:")
-        tookpost_pct = df['tookpost'].value_counts(normalize=True, dropna=False) * 100
-        print(tookpost_pct.round(2))
+        print("\nPercentage distribution of 'CC24_401' values:")
+        CC24_401_pct = df['CC24_401'].value_counts(normalize=True, dropna=False) * 100
+        print(CC24_401_pct.round(2))
     else:
-        print("\nColumn 'tookpost' not found in the dataset.")
+        print("\nColumn 'CC24_401' not found in the dataset.")
     
 except Exception as e:
     print(f"Error reading CSV file: {e}")

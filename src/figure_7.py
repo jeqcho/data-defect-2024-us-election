@@ -30,15 +30,17 @@ from adjustText import adjust_text  # Import the adjust_text method
 script_dir: str = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
+
+
+all_or_likely = "likely"
+# all_or_likely = "validated"
+
+suffix = "_likely"
+# suffix = "_validated"
+
 # Customize
 # total_votes_or_sample_size = "total_votes"
-total_votes_or_sample_size = "num_respondents_all"
-
-# all_or_likely = "likely"
-all_or_likely = "all"
-
-# suffix = "_likely"
-suffix = ""
+total_votes_or_sample_size = f"num_respondents{suffix}"
 
 
 def plot_z_scores(data, candidate, ax):
@@ -103,12 +105,12 @@ def plot_z_scores(data, candidate, ax):
     ax.grid(True, alpha=0.3)
 
     # Set y-axis limits from -15 to 5
-    ax.set_ylim(-20, 7)
+    ax.set_ylim(-20, 12)
 
     # Set custom y-axis ticks at -10, -5, -2, 0, 2, 5
-    ax.yaxis.set_major_locator(FixedLocator([-10, -5, -2, 0, 2, 5]))
+    ax.yaxis.set_major_locator(FixedLocator([-10, -5, -2, 0, 2, 5, 10]))
     # Format the tick labels
-    ax.set_yticklabels(["-10", "-5", "-2", "0", "2", "5"])
+    ax.set_yticklabels(["-10", "-5", "-2", "0", "2", "5", "10"])
 
     # Set custom x-axis ticks at 5.5, 6, 6.5, 7
     if total_votes_or_sample_size == "total_votes":
